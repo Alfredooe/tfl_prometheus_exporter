@@ -11,15 +11,9 @@ def update_metrics():
         if response.status_code != 200:
             print("Failed to fetch data")
             return
-        data = response.json()
-        for line in data:
-            name = line.get("name", "Unknown")
-            mode = line.get("modeName", "Unknown")
-            statuses = line.get("lineStatuses", [])
-            for status in statuses:
-                severity = status.get("statusSeverity", 0)
-                status_desc = status.get("statusSeverityDescription", "No status")
-                tfl_line_status.labels(line=name, mode=mode, status=status_desc).set(severity)
+        for line in response.json():
+            for status in line["lineStatuses"]:
+                tfl_line_status.labels(line=line["name"], mode=line["modeName"], status=status["statusSeverityDescription"]).set(status["statusSeverity"])
     except Exception as e:
         print(f"Error updating metrics: {e}")
 
